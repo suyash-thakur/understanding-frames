@@ -23,27 +23,28 @@ const computeFrameDifference = async (prevFramePath, currentFramePath, outputIma
   // Compute the absolute difference between frames
   const frameDiff = tf.abs(tf.sub(prevFrame, currentFrame));
 
-  console.log(frameDiff);
 
   // Threshold the difference frame to emphasize changes
   const thresholdedDiff = frameDiff.greater(tf.scalar(30)).mul(tf.scalar(255));
 
-  console.log(thresholdedDiff);
+  // console.log(prevFramePath);
 
   // Save the thresholded difference frame as an image
   const outputImageFilePath = path.join(outputDir, outputImageFileName);
   const outputImageBuffer = await tf.node.encodePng(thresholdedDiff);
-  fs.writeFileSync(outputImageFilePath, outputImageBuffer);
+  await fs.writeFileSync(outputImageFilePath, outputImageBuffer);
 
 
   // Dispose the tensors to free memory
   frameDiff.dispose();
   thresholdedDiff.dispose();
+  prevFrame.dispose();
+  currentFrame.dispose();
 };
 
 // Helper function to load an image using TensorFlow.js
 const loadImage = async (filePath) => {
-  const buffer = fs.readFileSync(filePath);
+  const buffer = await fs.readFileSync(filePath);
   const tensor = tf.node.decodeImage(buffer);
   return tensor;
 };
@@ -56,12 +57,15 @@ fs.readdir(inputDir, async (err, files) => {
   }
 
   // Sort files to ensure proper order
-  files.sort();
+  files = files.sort((a, b) => {
+    return parseInt(a.split('_')[1]) - parseInt(b.split('_')[1]);
+  });
 
   let prevKeyframePath = null;
 
   // Iterate through the files and process them
   for (const file of files) {
+    console.log(`Processing file: ${file}`);
     const filePath = path.join(inputDir, file);
 
     // Skip directories
