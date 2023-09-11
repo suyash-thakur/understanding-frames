@@ -1,1 +1,5 @@
 node_modules
+output
+frames
+output_diff
+output_video
