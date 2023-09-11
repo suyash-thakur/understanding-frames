@@ -25,19 +25,19 @@ const computeFrameDifference = async (prevFramePath, currentFramePath, outputIma
 
 
   // Threshold the difference frame to emphasize changes
-  const thresholdedDiff = frameDiff.greater(tf.scalar(30)).mul(tf.scalar(255));
+  // const thresholdedDiff = frameDiff.greater(tf.scalar(30)).mul(tf.scalar(255));
 
   // console.log(prevFramePath);
 
   // Save the thresholded difference frame as an image
   const outputImageFilePath = path.join(outputDir, outputImageFileName);
-  const outputImageBuffer = await tf.node.encodePng(thresholdedDiff);
+  const outputImageBuffer = await tf.node.encodePng(frameDiff);
   await fs.writeFileSync(outputImageFilePath, outputImageBuffer);
 
 
   // Dispose the tensors to free memory
   frameDiff.dispose();
-  thresholdedDiff.dispose();
+  // thresholdedDiff.dispose();
   prevFrame.dispose();
   currentFrame.dispose();
 };
